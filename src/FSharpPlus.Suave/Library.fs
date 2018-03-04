@@ -5,39 +5,35 @@ open Suave.WebPart
 open System
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
-module internal WebPart=
-(* how it's defined in suave:
-  let bind (f: 'a -> Async<'b option>) (a: Async<'a option>) = async {
-    let! p = a
-    match p with
-    | None ->
-      return None
-    | Some q ->
-      let r = f q
-      return! r
+open System.Net.Http
+// two types:
+// WebPart: 'a -> Async<'a option>
+// type WebPart = HttpContext -> Async<HttpContext option>
+// WebPartResult: Async<'a option>
+type WebPartResult<'a> = Async<'a option>
+//type WebPartResult = Async<HttpContent option>
+module WebPartResult=
+  let map (f:'T->'U) (x:WebPartResult<'T>) : WebPartResult<_>=
+    async {
+      let! x'=x
+      match x' with
+      | Some t-> return Some (f t)
+      | None -> return None
     }
-  let compose (first : 'a -> Async<'b option>) (second : 'b -> Async<'c option>)
-            : 'a -> Async<'c option> =
-    fun x ->
-      bind second (first x)
-  //'a -> Async<'a option>
-  *)
-  let map (f:'T->'U) (x:WebPart) = failwith "!"
-    //let inline map (f:'T->'U)=function
-    //|AccFailure e -> AccFailure e
-    //|AccSuccess a -> AccSuccess (f a)
-  let apply (f:'T->'U) (x:WebPart) :WebPart =
-    //WebPart.bind (fun x1 -> WebPart.bind (fun x2 -> async {return x1 x2}) x) f
+  let bind (f:_->WebPartResult<_>) (a: WebPartResult<_>) = WebPart.bind f a
+  let append (x:WebPartResult<'a>) (y:WebPartResult<'a>) =
+    failwith "!"
+  let apply (f:'T->'U) (x:WebPartResult<'a>) :WebPartResult<'a> =
     failwith "!"
 
-//'a -> Async<'a option>
+
 [<Extension;Sealed>]
 type WebPartExtensions=
 
   // as Applicative
-  [<Extension>]static member Return x = WebPart.succeed x
+  [<Extension>]static member Return x : WebPartResult<'a>= async { return Some x }
   // as Alternative (inherits from Applicative)
-  [<Extension>]static member inline get_Empty () = WebPart.never()
-  [<Extension>]static member (<*>) (f:'T->'U, x:WebPart) : WebPart = WebPart.apply f x
-  [<Extension>]static member inline Append (x:WebPart, y:WebPart) :WebPart =WebPart.compose x y
-  [<Extension>]static member inline Bind (x:WebPart, f:'T->WebPart) =WebPart.bind f x
+  [<Extension>]static member inline get_Empty () = async { return None }
+  [<Extension>]static member (<*>) (f:'T->'U, x:WebPartResult<_>) : WebPartResult<_> = WebPartResult.apply f x
+  [<Extension>]static member inline Append (x:WebPartResult<'a>, y:WebPartResult<'a>) :WebPartResult<'a> = WebPartResult.append x y
+  [<Extension>]static member inline Bind (x:WebPartResult<_>, f:'T->WebPartResult<_>) =WebPartResult.bind f x

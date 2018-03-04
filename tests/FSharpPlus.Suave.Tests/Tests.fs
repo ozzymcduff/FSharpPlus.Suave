@@ -13,12 +13,12 @@ open FSharpPlus
 let webPart ()=
   let overview =
     GET >=> fun (ctx) ->
-            async {
+            monad {
               return! OK ("") ctx
             }
   let register =
     POST >=> fun (ctx) ->
-            async {
+            monad {
               return! OK ("") ctx
             }
 
