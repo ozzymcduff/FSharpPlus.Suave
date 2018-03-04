@@ -21,7 +21,6 @@ NUGET
       NETStandard.Library (>= 1.6.1) - restriction: && (< net461) (>= netstandard1.6) (< netstandard2.0)
       System.Diagnostics.FileVersionInfo (>= 4.3) - restriction: || (&& (< net461) (>= netstandard1.6) (< netstandard2.0)) (&& (< net461) (>= netstandard2.0))
       System.ValueTuple (>= 4.4) - restriction: || (>= net461) (&& (>= netstandard1.6) (< netstandard2.0))
-    FsControl (1.0.9)
     FSharp.Core (4.3.3)
       System.Collections (>= 4.0.11) - restriction: && (< net45) (>= netstandard1.6) (< netstandard2.0)
       System.Console (>= 4.0) - restriction: && (< net45) (>= netstandard1.6) (< netstandard2.0)
@@ -46,8 +45,8 @@ NUGET
       System.Threading.Thread (>= 4.0) - restriction: && (< net45) (>= netstandard1.6) (< netstandard2.0)
       System.Threading.ThreadPool (>= 4.0.10) - restriction: && (< net45) (>= netstandard1.6) (< netstandard2.0)
       System.Threading.Timer (>= 4.0.1) - restriction: && (< net45) (>= netstandard1.6) (< netstandard2.0)
-    FSharpPlus (0.0.4)
-      FsControl (>= 1.0.9)
+    FSharpPlus (1.0.0-CI00148)
+      FSharp.Core (>= 4.2.3) - restriction: || (>= net45) (>= netstandard2.0)
     Libuv (1.10) - restriction: || (&& (>= netcoreapp1.0) (< netcoreapp1.1)) (&& (>= netcoreapp1.1) (< netcoreapp2.0))
       Microsoft.NETCore.Platforms (>= 1.0.1) - restriction: >= netstandard1.0
     Microsoft.Build (15.5.180) - restriction: >= netcoreapp1.0
