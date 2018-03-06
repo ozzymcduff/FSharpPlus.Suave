@@ -21,9 +21,6 @@
     <Tailcalls>true</Tailcalls>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="App.config">
-      <Paket>True</Paket>
-    </Content>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Library.fs" />
   </ItemGroup>
