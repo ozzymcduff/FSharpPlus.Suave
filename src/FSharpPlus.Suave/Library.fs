@@ -25,12 +25,30 @@ module WebPart=
       let r = f q
       return! r x
     }
-
+  let map (f: 'a -> 'b) (a: 'a-> Async<'a option>) :'a -> Async<'b option> = fun x-> async {
+    let! p = a x
+    match p with
+    | None ->
+      return None
+    | Some q ->
+      let r = f q
+      return Some r
+    }
 module SuaveTask=
   module WP = Suave.WebPart
 
   let unwrap (SuaveTask a) = a
   let bind = WP.bind
+  let map (f: 'a -> 'b) (a: Async<'a option>) : Async<'b option>= async {
+    let! p = a
+    match p with
+    | None ->
+      return None
+    | Some q ->
+      let r = f q
+      return Some r
+    }
+
 
 module Successful=
   module S = Suave.Successful
@@ -41,17 +59,18 @@ module Filters=
   let GET=WebPart <| F.GET
   let POST=WebPart <| F.POST
 
-[<Extension;Sealed>]
-type SuaveTaskExtensions=
+type SuaveTask<'a> with
 
   [<Extension>]static member Return x= SuaveTask <| async { return Some x }
   [<Extension>]static member inline get_Empty () = SuaveTask <| async { return None }
-  [<Extension>]static member inline Bind (SuaveTask x, f) =SuaveTask <| SuaveTask.bind (f>>SuaveTask.unwrap) x
+  [<Extension>]static member inline Bind (SuaveTask x, f:'a->SuaveTask<'b>) =SuaveTask <| SuaveTask.bind (f>>SuaveTask.unwrap) x
 
-[<Extension;Sealed>]
-type WebPartExtensions=
+  [<Extension>]static member inline Map (SuaveTask x, f:'a->'b) =SuaveTask <| SuaveTask.map f x
+
+type WebPart<'a> with
 
   [<Extension>]static member Return x= WebPart.wrap <| WebPart.succeed
   [<Extension>]static member inline get_Empty () = WebPart.wrap  <| fun _ -> async { return None }
 
   [<Extension>]static member inline Bind (WebPart x, f) = WebPart <| WebPart.bind (f>>WebPart.unwrap) x
+  [<Extension>]static member inline Map (WebPart x, f) = WebPart <| WebPart.map f x
