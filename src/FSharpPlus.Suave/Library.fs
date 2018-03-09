@@ -14,8 +14,10 @@ open System.Net.Http
 //type WebPart<'a> = WebPart of ('a->Async<'a option>)
 type SuaveTask<'a> = SuaveTask of (Async<'a option>)
 module WebPart=
-  //let unwrap (WebPart a) = a
-  let inline wrap (a:'a->Async<'a option>) = fun (ctx) ->
+  // looks a little like a bind
+  // ('a -> SuaveTask<'a>) -> 'a option -> SuaveTask<'a>
+  // or a lift of 'a option to a SuaveTask<'a>
+  let inline wrap (a:'a->Async<'a option>) =  fun (ctx) ->
       monad {
         match ctx with
         | Some c-> return! a c
@@ -25,6 +27,7 @@ module SuaveTask=
   module WP = Suave.WebPart
 
   let unwrap (SuaveTask a) = a
+  // ('a -> SuaveTask<'b>) -> SuaveTask<'a> -> SuaveTask<'b>
   let bind = WP.bind
   let map (f: 'a -> 'b) (a: Async<'a option>) : Async<'b option>= async {
     let! p = a
