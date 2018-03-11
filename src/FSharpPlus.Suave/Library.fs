@@ -11,18 +11,29 @@ open System.Net.Http
 // WebPart: 'a -> Async<'a option>
 // type WebPart = HttpContext -> Async<HttpContext option>
 // WebPartResult: Async<'a option>
-//type WebPart<'a> = WebPart of ('a->Async<'a option>)
+type WebPart<'a> = WebPart of ('a->Async<'a option>)
 type SuaveTask<'a> = SuaveTask of (Async<'a option>)
 module WebPart=
-  // looks a little like a bind
-  // ('a -> SuaveTask<'a>) -> 'a option -> SuaveTask<'a>
-  // or a lift of 'a option to a SuaveTask<'a>
-  let inline wrap (a:'a->Async<'a option>) =  fun (ctx) ->
-      monad {
-        match ctx with
-        | Some c-> return! a c
-        | None -> return None
-      }
+  let unwrap (WebPart a) = a
+  let wrap a =WebPart a
+  let bind (f: 'x-> 'a -> Async<'b option>) (a: 'a-> Async<'a option>) :'a -> Async<'b option> = fun x-> async {
+    let! p = a x
+    match p with
+    | None ->
+      return None
+    | Some q ->
+      let r = f q
+      return! r x
+    }
+  let map (f: 'a -> 'b) (a: 'a-> Async<'a option>) :'a -> Async<'b option> = fun x-> async {
+    let! p = a x
+    match p with
+    | None ->
+      return None
+    | Some q ->
+      let r = f q
+      return Some r
+    }
 module SuaveTask=
   module WP = Suave.WebPart
 
@@ -39,16 +50,16 @@ module SuaveTask=
       return Some r
     }
 
-(*
+
 module Successful=
   module S = Suave.Successful
-  let OK s= WebPart.wrap <| S.OK s
+  let OK s= WebPart <| S.OK s
 
 module Filters=
   module F = Suave.Filters
-  let GET=WebPart.wrap F.GET
-  let POST=WebPart.wrap F.POST
-*)
+  let GET=WebPart <| F.GET
+  let POST=WebPart <| F.POST
+
 type SuaveTask<'a> with
 
   [<Extension>]static member Return x= SuaveTask <| async { return Some x }
@@ -57,7 +68,6 @@ type SuaveTask<'a> with
 
   [<Extension>]static member inline Map (SuaveTask x, f:'a->'b) =SuaveTask <| SuaveTask.map f x
 
-(*
 type WebPart<'a> with
 
   [<Extension>]static member Return x= WebPart.wrap <| WebPart.succeed
@@ -65,4 +75,3 @@ type WebPart<'a> with
 
   [<Extension>]static member inline Bind (WebPart x, f) = WebPart <| WebPart.bind (f>>WebPart.unwrap) x
   [<Extension>]static member inline Map (WebPart x, f) = WebPart <| WebPart.map f x
-*)
