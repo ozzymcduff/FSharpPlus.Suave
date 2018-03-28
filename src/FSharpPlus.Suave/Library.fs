@@ -1,4 +1,4 @@
-namespace FSharpPlus.Suave
+module FSharpPlus.Suave
 open FSharpPlus
 open Suave
 open Suave.WebPart
@@ -7,16 +7,42 @@ open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 open System.Net.Http
 
-// two types:
-// WebPart: 'a -> Async<'a option>
-// type WebPart = HttpContext -> Async<HttpContext option>
-// WebPartResult: Async<'a option>
-type WebPart<'a> = WebPart of ('a->Async<'a option>)
+/// The base monad in Suave is SuaveTask<HttpContext>
 type SuaveTask<'a> = SuaveTask of (Async<'a option>)
+module SuaveTask=
+
+  let unwrap (SuaveTask a) = a
+  // ('a -> SuaveTask<'b>) -> SuaveTask<'a> -> SuaveTask<'b>
+  let bind = Suave.WebPart.bind // this is a bit confusing
+  let map (f: 'a -> 'b) (a: Async<'a option>) : Async<'b option>= async {
+    let! p = a
+    match p with
+    | None ->
+      return None
+    | Some q ->
+      let r = f q
+      return Some r
+    }
+
+type SuaveTask<'a> with
+
+  static member Return x= SuaveTask <| async { return Some x }
+  static member inline get_Empty () = SuaveTask <| async { return None }
+  static member inline (>>=) (SuaveTask x, f:'a->SuaveTask<'b>) =SuaveTask <| SuaveTask.bind (f>>SuaveTask.unwrap) x
+
+  static member inline Map (SuaveTask x, f:'a->'b) =SuaveTask <| SuaveTask.map f x
+
+type WebPart'<'a> = 'a -> SuaveTask<'a>
+
+type Option<'T> with
+    static member inline hoist (x:Option<'T>) = SuaveTask (result x)
+
 module WebPart=
-  let unwrap (WebPart a) = a
-  let wrap a =WebPart a
-  let bind (f: 'x-> 'a -> Async<'b option>) (a: 'a-> Async<'a option>) :'a -> Async<'b option> = fun x-> async {
+  //let unwrap (WebPart a) = a
+  //let wrap a =WebPart a
+  let wrapSuave (a:'a->Async<'a option>) :'a->SuaveTask<'a> = a >> SuaveTask
+
+  let bind (f: 'x-> 'a -> Async<'b option>) (a: 'a-> Async<'a option>) :'a -> Async<'b option> = fun x-> monad {
     let! p = a x
     match p with
     | None ->
@@ -34,44 +60,31 @@ module WebPart=
       let r = f q
       return Some r
     }
-module SuaveTask=
-  module WP = Suave.WebPart
 
-  let unwrap (SuaveTask a) = a
-  // ('a -> SuaveTask<'b>) -> SuaveTask<'a> -> SuaveTask<'b>
-  let bind = WP.bind
-  let map (f: 'a -> 'b) (a: Async<'a option>) : Async<'b option>= async {
-    let! p = a
-    match p with
-    | None ->
-      return None
-    | Some q ->
-      let r = f q
-      return Some r
-    }
+
+  let choose (options : WebPart'<'a> list) =
+    options
+      |> List.map (fun f -> f >> SuaveTask.unwrap)
+      |> WebPart.choose
+      |> wrapSuave
 
 
 module Successful=
   module S = Suave.Successful
-  let OK s= WebPart <| S.OK s
+  let OK s= WebPart.wrapSuave (S.OK s )
 
 module Filters=
   module F = Suave.Filters
-  let GET=WebPart <| F.GET
-  let POST=WebPart <| F.POST
+  let GET=WebPart.wrapSuave F.GET
+  let POST=WebPart.wrapSuave F.POST
+  let DELETE=WebPart.wrapSuave F.DELETE
+  let PUT=WebPart.wrapSuave F.PUT
+  let HEAD=WebPart.wrapSuave F.HEAD
+  let PATCH=WebPart.wrapSuave F.PATCH
+  let OPTIONS=WebPart.wrapSuave F.OPTIONS
 
-type SuaveTask<'a> with
-
-  [<Extension>]static member Return x= SuaveTask <| async { return Some x }
-  [<Extension>]static member inline get_Empty () = SuaveTask <| async { return None }
-  [<Extension>]static member inline Bind (SuaveTask x, f:'a->SuaveTask<'b>) =SuaveTask <| SuaveTask.bind (f>>SuaveTask.unwrap) x
-
-  [<Extension>]static member inline Map (SuaveTask x, f:'a->'b) =SuaveTask <| SuaveTask.map f x
-
-type WebPart<'a> with
-
-  [<Extension>]static member Return x= WebPart.wrap <| WebPart.succeed
-  [<Extension>]static member inline get_Empty () = WebPart.wrap  <| fun _ -> async { return None }
-
-  [<Extension>]static member inline Bind (WebPart x, f) = WebPart <| WebPart.bind (f>>WebPart.unwrap) x
-  [<Extension>]static member inline Map (WebPart x, f) = WebPart <| WebPart.map f x
+  let path s=WebPart.wrapSuave (F.path s)
+  let pathStarts s=WebPart.wrapSuave (F.pathStarts s)
+  let isSecure =WebPart.wrapSuave F.isSecure
+  let pathRegex s=WebPart.wrapSuave (F.pathRegex s)
+  let pathScan format ctx=WebPart.wrapSuave (F.pathScan format ctx)

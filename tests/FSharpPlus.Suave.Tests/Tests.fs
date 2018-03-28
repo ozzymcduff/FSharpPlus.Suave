@@ -14,7 +14,7 @@ open FSharpPlus.Suave.Filters
 open FSharpPlus
 let webPart ()=
   let overview =
-    GET >=> WebPart.wrap (fun (ctx) ->
+    GET >=> (fun (ctx) ->
             monad {
               return! OK ("") ctx
             })
