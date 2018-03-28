@@ -1,11 +1,6 @@
 module FSharpPlus.Suave
 open FSharpPlus
 open Suave
-open Suave.WebPart
-open System
-open System.Runtime.CompilerServices
-open System.Runtime.InteropServices
-open System.Net.Http
 
 /// The base monad in Suave is SuaveTask<HttpContext>
 type SuaveTask<'a> = SuaveTask of (Async<'a option>)
@@ -41,26 +36,6 @@ module WebPart=
   //let unwrap (WebPart a) = a
   //let wrap a =WebPart a
   let wrapSuave (a:'a->Async<'a option>) :'a->SuaveTask<'a> = a >> SuaveTask
-
-  let bind (f: 'x-> 'a -> Async<'b option>) (a: 'a-> Async<'a option>) :'a -> Async<'b option> = fun x-> monad {
-    let! p = a x
-    match p with
-    | None ->
-      return None
-    | Some q ->
-      let r = f q
-      return! r x
-    }
-  let map (f: 'a -> 'b) (a: 'a-> Async<'a option>) :'a -> Async<'b option> = fun x-> async {
-    let! p = a x
-    match p with
-    | None ->
-      return None
-    | Some q ->
-      let r = f q
-      return Some r
-    }
-
 
   let choose (options : WebPart'<'a> list) =
     options
