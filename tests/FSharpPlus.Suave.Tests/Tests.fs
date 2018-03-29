@@ -34,6 +34,7 @@ let webPart ()=
 
 open Suave
 open Suave.Testing
+open FSharpPlus.Data
 [<Tests>]
 let tests cfg=
   let requestOverview =req HttpMethod.GET "/notes" None
@@ -43,12 +44,12 @@ let tests cfg=
 
   testList "simple usage" [
     testCase "Be able to return index" <| fun _ ->
-      let runningWebp = webPart() >> SuaveTask.unwrap |> runWithConfig
+      let runningWebp = webPart() >> OptionT.run |> runWithConfig
       let res = runningWebp
                 |> requestIndex
       Expect.equal res "/" "Should return /"
     testCase "Be able to return request overview twice" <| fun _ ->
-      let runningWebp = webPart() >> SuaveTask.unwrap |> runWithConfig
+      let runningWebp = webPart() >> OptionT.run |> runWithConfig
 
       let res1 = runningWebp |> requestOverview
       Expect.equal res1 "overview 1" "Should return overview 1"
