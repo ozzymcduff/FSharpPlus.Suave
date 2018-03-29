@@ -33,33 +33,30 @@ type Option<'T> with
     static member inline hoist (x:Option<'T>) = SuaveTask (result x)
 
 module WebPart=
-  //let unwrap (WebPart a) = a
-  //let wrap a =WebPart a
-  let wrapSuave (a:'a->Async<'a option>) :'a->SuaveTask<'a> = a >> SuaveTask
 
   let choose (options : WebPart'<'a> list) =
     options
       |> List.map (fun f -> f >> SuaveTask.unwrap)
       |> WebPart.choose
-      |> wrapSuave
+      >> SuaveTask
 
 
 module Successful=
   module S = Suave.Successful
-  let OK s= WebPart.wrapSuave (S.OK s )
+  let OK s= SuaveTask<< (S.OK s )
 
 module Filters=
   module F = Suave.Filters
-  let GET=WebPart.wrapSuave F.GET
-  let POST=WebPart.wrapSuave F.POST
-  let DELETE=WebPart.wrapSuave F.DELETE
-  let PUT=WebPart.wrapSuave F.PUT
-  let HEAD=WebPart.wrapSuave F.HEAD
-  let PATCH=WebPart.wrapSuave F.PATCH
-  let OPTIONS=WebPart.wrapSuave F.OPTIONS
+  let GET=  SuaveTask << F.GET
+  let POST= SuaveTask << F.POST
+  let DELETE= SuaveTask << F.DELETE
+  let PUT= SuaveTask << F.PUT
+  let HEAD= SuaveTask << F.HEAD
+  let PATCH= SuaveTask << F.PATCH
+  let OPTIONS= SuaveTask << F.OPTIONS
 
-  let path s=WebPart.wrapSuave (F.path s)
-  let pathStarts s=WebPart.wrapSuave (F.pathStarts s)
-  let isSecure =WebPart.wrapSuave F.isSecure
-  let pathRegex s=WebPart.wrapSuave (F.pathRegex s)
-  let pathScan format ctx=WebPart.wrapSuave (F.pathScan format ctx)
+  let path s= SuaveTask << (F.path s)
+  let pathStarts s=SuaveTask << (F.pathStarts s)
+  let isSecure =SuaveTask << F.isSecure
+  let pathRegex s=SuaveTask << (F.pathRegex s)
+  let pathScan format ctx=SuaveTask << (F.pathScan format ctx)
