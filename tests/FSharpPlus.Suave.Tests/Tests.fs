@@ -14,46 +14,43 @@ open FSharpPlus.Suave.Filters
 open FSharpPlus
 
 let webPart ()=
+  printfn "init webpart"
   let mutable counter =0
   let overview =
     GET >=> (fun (ctx) ->
             monad {
               counter<-counter+1
+              printfn "opening overview %i" counter
               return! OK (sprintf "overview %i" counter) ctx
             })
   let register =
     POST >=> fun (ctx) ->
             monad {
-              counter<-counter+1
-              return! OK (sprintf "register %i" counter) ctx
+              printfn "opening register"
+              return! OK "register" ctx
             }
 
   WebPart.choose [ path "/" >=> (OK "/")
-                   path "/notes" >=> overview
-                   path "/note" >=> register]
+                   path "/note" >=> register
+                   path "/notes" >=> overview ]
 
 open Suave
 open Suave.Testing
 open FSharpPlus.Data
 [<Tests>]
 let tests cfg=
+  let runWithConfig = runWith cfg
   let requestOverview =req HttpMethod.GET "/notes" None
   let requestIndex =req HttpMethod.GET "/" None
-
-  let runWithConfig = runWith cfg
+  let runningWebp = webPart() >> OptionT.run |> runWithConfig
 
   testList "simple usage" [
     testCase "Be able to return index" <| fun _ ->
-      let runningWebp = webPart() >> OptionT.run |> runWithConfig
       let res = runningWebp
                 |> requestIndex
       Expect.equal res "/" "Should return /"
     testCase "Be able to return request overview twice" <| fun _ ->
-      let runningWebp = webPart() >> OptionT.run |> runWithConfig
-
+      printfn "first request"
       let res1 = runningWebp |> requestOverview
       Expect.equal res1 "overview 1" "Should return overview 1"
-      let res = runningWebp |> requestOverview
-
-      Expect.equal res "overview 2" "Should return overview 2"
   ]
