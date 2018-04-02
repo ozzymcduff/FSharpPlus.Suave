@@ -18,9 +18,9 @@ module WebPart=
   //let choose (options : WebPart'<'a> list) =fun x -> choice (List.map ( (|>) x) options)
   let choose (options : WebPart'<'a> list) =
       options
-      |> List.map (fun f -> f >> OptionT.run)
+      |> List.map (fun f -> f >> OptionT.run) // this is more intended to unwrap OptionT
       |> WebPart.choose
-      >> OptionT
+      >> OptionT // wrapping as an OptionT again
 module Successful=
   module S = Suave.Successful
   let OK s= OptionT<< (S.OK s )
