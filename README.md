@@ -9,7 +9,7 @@
 MacOS/Linux | Windows
 --- | ---
 [![Travis Badge](https://travis-ci.org/wallymathieu/FSharpPlus.Suave.svg?branch=master)](https://travis-ci.org/wallymathieu/FSharpPlus.Suave) | [![Build status](https://ci.appveyor.com/api/projects/status/github/wallymathieu/FSharpPlus.Suave?svg=true)](https://ci.appveyor.com/project/wallymathieu/FSharpPlus.Suave)
-[![Build History](https://buildstats.info/travisci/chart/wallymathieu/FSharpPlus.Suave)](https://travis-ci.org/wallymathieu/FSharpPlus.Suave/builds) | [![Build History](https://buildstats.info/appveyor/chart/wallymathieu/FSharpPlus.Suave)](https://ci.appveyor.com/project/wallymathieu/FSharpPlus.Suave)  
+[![Build History](https://buildstats.info/travisci/chart/wallymathieu/FSharpPlus.Suave)](https://travis-ci.org/wallymathieu/FSharpPlus.Suave/builds) | [![Build History](https://buildstats.info/appveyor/chart/wallymathieu/fsharpplus-suave)](https://ci.appveyor.com/project/wallymathieu/fsharpplus-suave)  
 
 
 ## Nuget 
