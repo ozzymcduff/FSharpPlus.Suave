@@ -83,4 +83,7 @@ let tests =
       let res1 = runningWebp requestOverview
                  |> extractContext |> contentAsString
       Expect.equal res1 "overview 1" "Should return overview 1"
+      let res2 = runningWebp requestOverview
+                 |> extractContext |> contentAsString
+      Expect.equal res2 "overview 2" "Should return overview 2"
   ]
