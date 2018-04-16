@@ -36,3 +36,22 @@ module Filters=
   let isSecure =OptionT << F.isSecure
   let pathRegex s=OptionT << (F.pathRegex s)
   let pathScan format ctx=OptionT << (F.pathScan format ctx)
+open FSharpPlus.Lens
+module Writers=
+  module W=Suave.Writers
+
+  //
+  let inline _response f ctx = map (fun a' -> { ctx with response=a' }) (f ctx.response)
+  module Result =
+    let inline _status f (resp:HttpResult) = map (fun a' -> { resp with status=a' }) (f resp.status)
+    //let inline _headers f (resp:HttpResult) = map (fun a' -> { resp with headers=a' }) (f resp.headers)
+
+  module Status =
+    let inline _code f status = map (fun a' -> { status with code = a' }) (f status.code)
+    let inline _reason f status = map (fun a' -> { status with reason = a' }) (f status.reason)
+
+//  let setStatus (s : HttpCode) = OptionT << W.setStatus s
+  let setHeader t = OptionT << W.setHeader t
+  let setHeaderValue t = OptionT << W.setHeaderValue t
+  let setMimeType t = OptionT << W.setMimeType t
+
