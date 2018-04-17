@@ -43,27 +43,6 @@ let webPart ()=
                    path "/note" >=> register
                    path "/notes" >=> overview ]
 
-module SuaveTest=
-  // Code inspired by blog post
-  // http://mattjolson.github.io/2016/12/12/testing-suave-webparts.html
-
-  /// extract content syncronously
-  let extractContext maybeHc =
-    maybeHc |> Async.RunSynchronously |> Option.get
-
-  let contentAsString (hc:Suave.Http.HttpContext) =
-      match hc.response.content with
-      | Bytes b -> b |> System.Text.Encoding.Default.GetString
-      | NullContent -> ""
-      | SocketTask st -> "SOCKET"
-  /// request without data
-  let req method u =
-    let uri = new System.Uri("http://some.random.tld" + u)
-    let rawQuery = uri.Query.TrimStart('?')
-    let req = { HttpRequest.empty with url = uri ;``method`` = method ; rawQuery = rawQuery }
-    { HttpContext.empty with request = req }
-
-
 open SuaveTest
 [<Tests>]
 let tests =

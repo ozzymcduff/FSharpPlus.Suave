@@ -6,6 +6,7 @@ nuget FSharpPlus 1.0.0-RC3
 nuget Suave 2.2.1
 # nuget Suave.Testing 2.2.1
 nuget Argu 3.7
+nuget Newtonsoft.Json 10.0.3
 nuget FSharp.Core 4.3.4
 nuget Expecto 5.1.2
 nuget SourceLink.Create.CommandLine 2.7.2 copy_local: true
