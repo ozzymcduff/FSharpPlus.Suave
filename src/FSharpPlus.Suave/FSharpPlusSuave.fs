@@ -18,7 +18,8 @@ module WebPart=
   let choose (options : WebPart'<'a> list) =fun x -> choice (List.map ( (|>) x) options)
 module Http=
   module H=Suave.Http
-  let request f x=OptionT<< H.request f x
+  let request apply = H.request apply
+
 module Successful=
   module S = Suave.Successful
   let OK s= OptionT<< (S.OK s )

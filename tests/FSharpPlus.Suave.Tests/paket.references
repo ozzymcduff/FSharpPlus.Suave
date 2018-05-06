@@ -1,5 +1,7 @@
 Expecto
 FSharp.Core
+FSharpPlus
+Suave
 Microsoft.DotNet.Watcher.Tools
 dotnet-mono
 Newtonsoft.Json
