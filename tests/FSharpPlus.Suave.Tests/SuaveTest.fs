@@ -23,4 +23,4 @@ let req method u =
   let req = { HttpRequest.empty with url = uri ;``method`` = method ; rawQuery = rawQuery }
   { HttpContext.empty with request = req }
 let withBody context body=
-    { context with request = { context.request with rawForm=form } }
+    { context with request = { context.request with rawForm=body } }
