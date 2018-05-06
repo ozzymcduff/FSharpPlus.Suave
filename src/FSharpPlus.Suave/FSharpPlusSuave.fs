@@ -16,7 +16,9 @@ type WebPart'<'a> = 'a -> OptionT<Async<'a option>>
 module WebPart=
 
   let choose (options : WebPart'<'a> list) =fun x -> choice (List.map ( (|>) x) options)
-
+module Http=
+  module H=Suave.Http
+  let request f x=OptionT<< H.request f x
 module Successful=
   module S = Suave.Successful
   let OK s= OptionT<< (S.OK s )
