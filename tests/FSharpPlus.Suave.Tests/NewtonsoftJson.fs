@@ -47,10 +47,8 @@ let ``JSONorBAD_REQUEST`` (result:Result<_,_>) =
     |> BAD_REQUEST
     >=> setMimeType "application/json; charset=utf-8"
 
-let private getStringFromBytes rawForm = Encoding.UTF8.GetString(rawForm)
-
 let getBodyAsJSON<'a> (ctx : HttpContext) =
-  let str = ctx.request.rawForm |> getStringFromBytes
+  let str = ctx.request.rawForm |> Encoding.UTF8.GetString
   try
     Ok(JsonConvert.DeserializeObject<'a> str)
   with exn -> Error exn
