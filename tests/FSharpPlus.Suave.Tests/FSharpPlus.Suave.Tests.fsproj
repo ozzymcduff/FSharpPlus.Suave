@@ -11,10 +11,15 @@
     <Compile Include="Tests.fs" />
     <Compile Include="NewtonsoftJson.fs" />
     <Compile Include="NewtonsoftJsonTests.fs" />
+    <Compile Include="Fleece.fs" />
+    <Compile Include="FleeceTests.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/FSharpPlus.Suave/FSharpPlus.Suave.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Fleece.FSharpData" Version="0.6.0" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

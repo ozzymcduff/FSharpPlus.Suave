@@ -12,7 +12,7 @@ module SuaveTask=
 
 
 type WebPart'<'a> = 'a -> OptionT<Async<'a option>>
-
+type WebPart = HttpContext -> OptionT<Async<HttpContext option>>
 module WebPart=
 
   let choose (options : WebPart'<'a> list) =fun x -> choice (List.map ( (|>) x) options)
