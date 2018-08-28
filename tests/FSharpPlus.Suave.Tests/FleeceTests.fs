@@ -54,7 +54,7 @@ let tests =
   let requestIndex =req HttpMethod.GET "/"
   let runningWebp = webPart() >> OptionT.run
 
-  testList "Using Newtonsoft Json" [
+  testList "Using Fleece Json" [
     testCase "Be able to return index" <| fun _ ->
       let res = runningWebp requestIndex
                 |> extractContext |> contentAsString
