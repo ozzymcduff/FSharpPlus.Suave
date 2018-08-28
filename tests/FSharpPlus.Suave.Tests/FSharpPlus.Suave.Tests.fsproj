@@ -7,7 +7,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="SuaveTest.fs" />
     <Compile Include="Tests.fs" />
+    <Compile Include="NewtonsoftJson.fs" />
+    <Compile Include="NewtonsoftJsonTests.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
