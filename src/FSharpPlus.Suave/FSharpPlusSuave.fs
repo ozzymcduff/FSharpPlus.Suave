@@ -65,7 +65,7 @@ module Writers=
     let inline _code f status = map (fun a' -> { status with code = a' }) (f status.code)
     let inline _reason f status = map (fun a' -> { status with reason = a' }) (f status.reason)
 
-//  let setStatus (s : HttpCode) = OptionT << W.setStatus s
+  let setStatus (s : HttpCode) = OptionT << W.setStatus s
   let setHeader k v = OptionT << W.setHeader k v
   let setHeaderValue k v = OptionT << W.setHeaderValue k v
   let setMimeType t = OptionT << W.setMimeType t
