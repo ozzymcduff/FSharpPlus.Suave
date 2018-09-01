@@ -54,7 +54,7 @@ type TargetFramework =
 | Full of string
 | Core of string
 
-let (|StartsWith|_|) prefix (s: string) =
+let (|StartsWith|_|) (prefix: string) (s: string) =
     if s.StartsWith prefix then Some () else None
 
 let getTargetFramework tf =

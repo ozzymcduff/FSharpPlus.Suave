@@ -12,7 +12,7 @@ module SuaveTask=
 
 
 type WebPart'<'a> = 'a -> OptionT<Async<'a option>>
-
+type WebPart = HttpContext -> OptionT<Async<HttpContext option>>
 module WebPart=
 
   let choose (options : WebPart'<'a> list) =fun x -> choice (List.map ( (|>) x) options)
@@ -22,30 +22,32 @@ module Http=
 
 module Successful=
   module S = Suave.Successful
-  let OK s= OptionT<< (S.OK s )
+  let OK s                 :WebPart= OptionT<< (S.OK s )
 module RequestErrors=
   module RE = Suave.RequestErrors
-  let BAD_REQUEST s= OptionT<< (RE.BAD_REQUEST s )
-  let NOT_ACCEPTABLE s= OptionT<< (RE.NOT_ACCEPTABLE s )
-  let METHOD_NOT_ALLOWED s= OptionT<< (RE.METHOD_NOT_ALLOWED s )
-  let FORBIDDEN s= OptionT<< (RE.FORBIDDEN s )
-  let NOT_FOUND s= OptionT<< (RE.NOT_FOUND s )
+  let BAD_REQUEST s        :WebPart= OptionT<< (RE.BAD_REQUEST s )
+  let NOT_ACCEPTABLE s     :WebPart= OptionT<< (RE.NOT_ACCEPTABLE s )
+  let METHOD_NOT_ALLOWED s :WebPart = OptionT<< (RE.METHOD_NOT_ALLOWED s )
+  let FORBIDDEN s          :WebPart = OptionT<< (RE.FORBIDDEN s )
+  let NOT_FOUND s          :WebPart = OptionT<< (RE.NOT_FOUND s )
 
 module Filters=
   module F = Suave.Filters
-  let GET=  OptionT << F.GET
-  let POST= OptionT << F.POST
-  let DELETE= OptionT << F.DELETE
-  let PUT= OptionT << F.PUT
-  let HEAD= OptionT << F.HEAD
-  let PATCH= OptionT << F.PATCH
-  let OPTIONS= OptionT << F.OPTIONS
+  let GET                  :WebPart = OptionT << F.GET
+  let POST                 :WebPart = OptionT << F.POST
+  let DELETE               :WebPart = OptionT << F.DELETE
+  let PUT                  :WebPart = OptionT << F.PUT
+  let HEAD                 :WebPart = OptionT << F.HEAD
+  let PATCH                :WebPart = OptionT << F.PATCH
+  let OPTIONS              :WebPart = OptionT << F.OPTIONS
 
-  let path s= OptionT << (F.path s)
-  let pathStarts s=OptionT << (F.pathStarts s)
-  let isSecure =OptionT << F.isSecure
-  let pathRegex s=OptionT << (F.pathRegex s)
-  let pathScan format ctx=OptionT << (F.pathScan format ctx)
+  let path s               :WebPart= OptionT << (F.path s)
+  let pathStarts s         :WebPart= OptionT << (F.pathStarts s)
+  let isSecure             :WebPart= OptionT << F.isSecure
+  let pathRegex s          :WebPart= OptionT << (F.pathRegex s)
+  let pathScan (pf : PrintfFormat<_,_,_,_,'t>) (h : 't ->  WebPart) : WebPart =
+    OptionT<< (F.pathScan pf (fun t ctx->OptionT.run ((h t) ctx))) // looks kind of weird, but perhaps OK
+
 open FSharpPlus.Lens
 module Writers=
   module W=Suave.Writers
@@ -65,7 +67,7 @@ module Writers=
     let inline _code f status = map (fun a' -> { status with code = a' }) (f status.code)
     let inline _reason f status = map (fun a' -> { status with reason = a' }) (f status.reason)
 
-//  let setStatus (s : HttpCode) = OptionT << W.setStatus s
+  let setStatus (s : HttpCode) = OptionT << W.setStatus s
   let setHeader k v = OptionT << W.setHeader k v
   let setHeaderValue k v = OptionT << W.setHeaderValue k v
   let setMimeType t = OptionT << W.setMimeType t

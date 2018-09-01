@@ -11,6 +11,8 @@
     <Compile Include="Tests.fs" />
     <Compile Include="NewtonsoftJson.fs" />
     <Compile Include="NewtonsoftJsonTests.fs" />
+    <Compile Include="Fleece.fs" />
+    <Compile Include="FleeceTests.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
