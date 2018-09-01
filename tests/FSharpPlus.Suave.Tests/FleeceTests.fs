@@ -43,15 +43,23 @@ let webPart ()=
               let body : Note ParseResult = getBodyAsJSON ctx
               return! JSONorBAD_REQUEST body ctx
             }
+  let getNote (id:int) :WebPart=
+    GET >=> fun (ctx) ->
+            monad {
+              printfn "get note"
+              return! JSON (List.head sampleNotes) ctx
+            }
 
   WebPart.choose [ path "/" >=> (OK "/")
                    path "/note" >=> register
+                   pathScan "/note/%d" getNote
                    path "/notes" >=> overview ]
 [<Tests>]
 let tests =
 
   let requestOverview =req HttpMethod.GET "/notes"
   let requestIndex =req HttpMethod.GET "/"
+  let requestNote id =req HttpMethod.GET (sprintf "/note/%d" id)
   let runningWebp = webPart() >> OptionT.run
 
   testList "Using Fleece Json" [
@@ -59,6 +67,14 @@ let tests =
       let res = runningWebp requestIndex
                 |> extractContext |> contentAsString
       Expect.equal res "/" "Should return /"
+
+    testCase "Be able to return single note" <| fun _ ->
+      let res : Note ParseResult
+                = runningWebp ( requestNote 1 )
+                 |> extractContext |> contentAsString
+                 |> JsonValue.Parse
+                 |> ofJson
+      Expect.equal res (Ok {text="hej"}) "Should return /note/1"
 
     testCase "Be able to request returning json" <| fun _ ->
       let res1: Note list ParseResult
