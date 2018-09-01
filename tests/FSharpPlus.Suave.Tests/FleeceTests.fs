@@ -33,10 +33,7 @@ type Note={ text:string }
 let sampleNotes=["hej"; "svejs";] |> map Note.create
 let webPart ()=
   let overview =
-    GET >=> (fun (ctx) ->
-            monad {
-              return! Json.OK sampleNotes ctx
-            })
+    GET >=> Json.OK sampleNotes
   let register =
     POST >=> fun (ctx) ->
             monad {
@@ -72,16 +69,14 @@ let tests =
       let res : Note ParseResult
                 = runningWebp ( requestNote 1 )
                  |> extractContext |> contentAsString
-                 |> JsonValue.Parse
-                 |> ofJson
+                 |> parseJson
       Expect.equal res (Ok {text="hej"}) "Should return /note/1"
 
     testCase "Be able to request returning json" <| fun _ ->
       let res1: Note list ParseResult
                 = runningWebp requestOverview
                  |> extractContext |> contentAsString
-                 |> JsonValue.Parse
-                 |> ofJson
+                 |> parseJson
 
       Expect.equal res1 (Ok sampleNotes) "Should return sample notes"
   ]

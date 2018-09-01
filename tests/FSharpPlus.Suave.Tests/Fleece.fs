@@ -13,10 +13,10 @@ open FSharp.Data
 
 module Json=
   let inline OK v : WebPart=
-    OK ((toJson v).ToString())
+    OK <| string (toJson v)
     >=> setMimeType "application/json; charset=utf-8"
   let inline BAD_REQUEST v : WebPart=
-    BAD_REQUEST ((toJson v).ToString())
+    BAD_REQUEST <| string (toJson v)
     >=> setMimeType "application/json; charset=utf-8"
 
   let inline ``OK_or_BAD_REQUEST`` (result) : WebPart=
