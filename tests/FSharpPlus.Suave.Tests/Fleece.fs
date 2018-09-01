@@ -25,5 +25,4 @@ module Json=
     | Error err -> BAD_REQUEST err
 
   let inline getBody (ctx : Suave.Http.HttpContext)=
-    let str = ctx.request.rawForm |> System.Text.Encoding.UTF8.GetString
-    ofJson (JsonValue.Parse str)
+    ctx.request.rawForm |> System.Text.Encoding.UTF8.GetString |> parseJson
