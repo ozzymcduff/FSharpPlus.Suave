@@ -22,13 +22,13 @@ let webPart ()=
   let overview =
     GET >=> (fun (ctx) ->
             monad {
-              return! JSON sampleNotes ctx
+              return! Json.OK sampleNotes ctx
             })
   let register =
     POST >=> fun (ctx) ->
             monad {
-              let body=getBodyAsJSON<Note>(ctx)
-              return! JSONorBAD_REQUEST body ctx
+              let body=Json.getBody<Note>(ctx)
+              return! Json.OK_or_BAD_REQUEST body ctx
             }
 
   WebPart.choose [ path "/" >=> (OK "/")

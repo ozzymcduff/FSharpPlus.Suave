@@ -11,19 +11,19 @@ open Fleece
 open Fleece.FSharpData
 open FSharp.Data
 
-let inline JSON v : WebPart=
-  OK ((toJson v).ToString())
-  >=> setMimeType "application/json; charset=utf-8"
-
-let inline ``JSONorBAD_REQUEST`` (result) : WebPart=
-  match result with
-  | Ok v -> JSON v
-  | Error err ->
-    ((toJson err).ToString())
-    |> BAD_REQUEST
+module Json=
+  let inline OK v : WebPart=
+    OK ((toJson v).ToString())
+    >=> setMimeType "application/json; charset=utf-8"
+  let inline BAD_REQUEST v : WebPart=
+    BAD_REQUEST ((toJson v).ToString())
     >=> setMimeType "application/json; charset=utf-8"
 
-let inline getBodyAsJSON (ctx : Suave.Http.HttpContext)=
-  let getStringFromBytes rawForm = System.Text.Encoding.UTF8.GetString(rawForm)
-  let str = ctx.request.rawForm |> getStringFromBytes
-  ofJson (JsonValue.Parse str)
+  let inline ``OK_or_BAD_REQUEST`` (result) : WebPart=
+    match result with
+    | Ok v -> OK v
+    | Error err -> BAD_REQUEST err
+
+  let inline getBody (ctx : Suave.Http.HttpContext)=
+    let str = ctx.request.rawForm |> System.Text.Encoding.UTF8.GetString
+    ofJson (JsonValue.Parse str)

@@ -35,19 +35,19 @@ let webPart ()=
   let overview =
     GET >=> (fun (ctx) ->
             monad {
-              return! JSON sampleNotes ctx
+              return! Json.OK sampleNotes ctx
             })
   let register =
     POST >=> fun (ctx) ->
             monad {
-              let body : Note ParseResult = getBodyAsJSON ctx
-              return! JSONorBAD_REQUEST body ctx
+              let body : Note ParseResult = Json.getBody ctx
+              return! Json.OK_or_BAD_REQUEST body ctx
             }
   let getNote (id:int) :WebPart=
     GET >=> fun (ctx) ->
             monad {
               printfn "get note"
-              return! JSON (List.head sampleNotes) ctx
+              return! Json.OK (List.head sampleNotes) ctx
             }
 
   WebPart.choose [ path "/" >=> (OK "/")
