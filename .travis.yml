@@ -1,6 +1,5 @@
-sudo: false
-language: csharp 
-dist: trusty
+
+language: csharp
 dotnet: 2.1.401
 
 script:
